@@ -1,20 +1,20 @@
 #!/usr/bin/env node
-import * as cdk from 'aws-cdk-lib';
-import { XochitlFileSystemStack } from '../lib/xochitl-file-system-stack';
+import * as cdk from "aws-cdk-lib";
+import { FileStorageStack } from "../lib/file-storage-stack";
+import { allowedStages, StageTypes } from "../lib/constants/allowed-stages";
 
 const app = new cdk.App();
-new XochitlFileSystemStack(app, 'XochitlFileSystemStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+// Retrieve the stage from context or default to 'dev'
+const stage: StageTypes = app.node.tryGetContext("stage") || allowedStages.dev;
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+// Validate the stage
+if (!allowedStages?.[stage]) {
+  throw new Error(
+    `Invalid stage "${stage}". Allowed stages are: ${Object.values(allowedStages).join(", ")}`
+  );
+}
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+new FileStorageStack(app, "file-storage-stack", {
+  stage,
 });
